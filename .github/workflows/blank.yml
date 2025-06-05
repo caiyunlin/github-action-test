@@ -38,3 +38,7 @@ jobs:
         run: |
           echo Add other actions to build,
           echo test, and deploy your project.
+      
+      - name: Set output
+        run: echo "request_id=${{ inputs.request_id }}" >> $GITHUB_OUTPUT
+        id: set_output
