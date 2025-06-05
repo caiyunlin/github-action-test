@@ -10,7 +10,7 @@ on:
   pull_request:
     branches: [ "main" ]
   # Allows you to run this workflow manually from the Actions tab
-  workflow_call:
+  workflow_dispatch:
     inputs:
       request_id:
         required: true
