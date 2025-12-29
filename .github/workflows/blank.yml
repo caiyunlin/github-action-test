@@ -38,8 +38,6 @@ jobs:
         run: |
           echo Add other actions to build,
           echo test, and deploy your project.
-          echo simulate error
-          exit 1
       
       - name: Set output
         run: echo "request_id=${{ inputs.request_id }}" >> $GITHUB_OUTPUT
