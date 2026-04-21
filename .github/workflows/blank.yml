@@ -18,6 +18,9 @@ on:
       tracking_id:
         required: true
         type: string
+      payload:
+        required: false
+        type: string
 
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
@@ -43,6 +46,7 @@ jobs:
       - name: Run a multi-line script
         run: |
           echo "trackingId ${{ inputs.tracking_id }}"
+          echo "payload ${{ inputs.payload }}"
           echo Add other actions to build,
           echo test, and deploy your project.
       
