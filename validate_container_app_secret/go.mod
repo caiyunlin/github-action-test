@@ -1,4 +1,4 @@
-module github.com/caiyunlin/github-action-test/validate_container_apps_secret
+module github.com/caiyunlin/github-action-test/validate_container_app_secret
 
 go 1.23.0
 
