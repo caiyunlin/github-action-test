@@ -17,7 +17,10 @@ type config struct {
 	containerName           string
 	secretName              string
 	environmentVariableName string
+	keyVaultName            string
+	targetSecretName        string
 	keyVaultSecretURL       string
+	managedIdentityName     string
 	managedIdentityID       string
 	githubEnvironmentPath   string
 }
@@ -68,8 +71,9 @@ func loadConfig() (config, error) {
 		containerName:           strings.TrimSpace(os.Getenv("ACA_CONTAINER_NAME")),
 		secretName:              strings.TrimSpace(os.Getenv("ACA_SECRET_NAME")),
 		environmentVariableName: strings.TrimSpace(os.Getenv("ACA_ENVIRONMENT_VARIABLE")),
-		keyVaultSecretURL:       strings.TrimRight(strings.TrimSpace(os.Getenv("TARGET_SECRET_URL")), "/"),
-		managedIdentityID:       strings.TrimRight(strings.TrimSpace(os.Getenv("ACA_KEY_VAULT_IDENTITY")), "/"),
+		keyVaultName:            strings.TrimSpace(os.Getenv("KEY_VAULT_NAME")),
+		targetSecretName:        strings.TrimSpace(os.Getenv("TARGET_SECRET_NAME")),
+		managedIdentityName:     strings.TrimSpace(os.Getenv("ACA_KEY_VAULT_IDENTITY_NAME")),
 		githubEnvironmentPath:   strings.TrimSpace(os.Getenv("GITHUB_ENV")),
 	}
 
@@ -83,8 +87,9 @@ func loadConfig() (config, error) {
 		{name: "ACA_CONTAINER_NAME", value: cfg.containerName},
 		{name: "ACA_SECRET_NAME", value: cfg.secretName},
 		{name: "ACA_ENVIRONMENT_VARIABLE", value: cfg.environmentVariableName},
-		{name: "TARGET_SECRET_URL", value: cfg.keyVaultSecretURL},
-		{name: "ACA_KEY_VAULT_IDENTITY", value: cfg.managedIdentityID},
+		{name: "KEY_VAULT_NAME", value: cfg.keyVaultName},
+		{name: "TARGET_SECRET_NAME", value: cfg.targetSecretName},
+		{name: "ACA_KEY_VAULT_IDENTITY_NAME", value: cfg.managedIdentityName},
 		{name: "GITHUB_ENV", value: cfg.githubEnvironmentPath},
 	}
 	for _, item := range required {
@@ -92,6 +97,17 @@ func loadConfig() (config, error) {
 			return config{}, fmt.Errorf("environment variable %s is required", item.name)
 		}
 	}
+	cfg.keyVaultSecretURL = fmt.Sprintf(
+		"https://%s.vault.azure.net/secrets/%s",
+		cfg.keyVaultName,
+		cfg.targetSecretName,
+	)
+	cfg.managedIdentityID = fmt.Sprintf(
+		"/subscriptions/%s/resourceGroups/%s/providers/Microsoft.ManagedIdentity/userAssignedIdentities/%s",
+		cfg.subscriptionID,
+		cfg.resourceGroupName,
+		cfg.managedIdentityName,
+	)
 	return cfg, nil
 }
 

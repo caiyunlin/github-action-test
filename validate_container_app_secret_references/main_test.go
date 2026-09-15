@@ -22,6 +22,32 @@ func TestValidateContainerApp(t *testing.T) {
 	}
 }
 
+func TestLoadConfigBuildsManagedIdentityResourceID(t *testing.T) {
+	t.Setenv("AZURE_SUBSCRIPTION_ID", "subscription")
+	t.Setenv("ACA_RESOURCE_GROUP", "aca-rg")
+	t.Setenv("ACA_NAME", "aca-hello")
+	t.Setenv("ACA_CONTAINER_NAME", "simple-hello-world-container")
+	t.Setenv("ACA_SECRET_NAME", "temporal-api-key")
+	t.Setenv("ACA_ENVIRONMENT_VARIABLE", "TEMPORAL_API_KEY")
+	t.Setenv("KEY_VAULT_NAME", "mykv0224")
+	t.Setenv("TARGET_SECRET_NAME", "temporal-api-key")
+	t.Setenv("ACA_KEY_VAULT_IDENTITY_NAME", "aca-hello-keyvault-identity")
+	t.Setenv("GITHUB_ENV", filepath.Join(t.TempDir(), "github-env"))
+
+	cfg, err := loadConfig()
+	if err != nil {
+		t.Fatalf("loadConfig() error = %v", err)
+	}
+	expected := "/subscriptions/subscription/resourceGroups/aca-rg/providers/Microsoft.ManagedIdentity/userAssignedIdentities/aca-hello-keyvault-identity"
+	if cfg.managedIdentityID != expected {
+		t.Errorf("managedIdentityID = %q, want %q", cfg.managedIdentityID, expected)
+	}
+	expectedSecretURL := "https://mykv0224.vault.azure.net/secrets/temporal-api-key"
+	if cfg.keyVaultSecretURL != expectedSecretURL {
+		t.Errorf("keyVaultSecretURL = %q, want %q", cfg.keyVaultSecretURL, expectedSecretURL)
+	}
+}
+
 func TestValidateContainerAppRejectsWrongKeyVaultURL(t *testing.T) {
 	cfg := testConfig()
 	identity, properties := validContainerApp(cfg)
@@ -54,6 +80,7 @@ func testConfig() config {
 		secretName:              "temporal-api-key",
 		environmentVariableName: "TEMPORAL_API_KEY",
 		keyVaultSecretURL:       "https://mykv0224.vault.azure.net/secrets/temporal-api-key",
+		managedIdentityName:     "aca-identity",
 		managedIdentityID:       "/subscriptions/subscription/resourceGroups/aca-rg/providers/Microsoft.ManagedIdentity/userAssignedIdentities/aca-identity",
 	}
 }
